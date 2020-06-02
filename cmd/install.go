@@ -49,6 +49,8 @@ func MakeInstall() *cobra.Command {
 Provide the --local-path flag with --merge if a kubeconfig already exists in some other directory`)
 	command.Flags().String("k3s-version", config.K3sVersion, "Optional version to install, pinned at a default")
 
+	command.Flags().String("k3s-url", config.K3sUrl, "Optional URL of the k3s setup script")
+
 	command.Flags().Bool("local", false, "Perform a local install without using ssh")
 	command.Flags().Bool("cluster", false, "Form a dqlite cluster")
 
@@ -67,6 +69,7 @@ Provide the --local-path flag with --merge if a kubeconfig already exists in som
 		}
 
 		k3sVersion, _ := command.Flags().GetString("k3s-version")
+		k3sUrl, _ := command.Flags().GetString("k3s-url")
 		k3sExtraArgs, _ := command.Flags().GetString("k3s-extra-args")
 		k3sNoExtras, _ := command.Flags().GetBool("no-extras")
 
@@ -92,7 +95,7 @@ Provide the --local-path flag with --merge if a kubeconfig already exists in som
 
 		installk3sExec := fmt.Sprintf("INSTALL_K3S_EXEC='server %s --tls-san %s %s'", clusterStr, ip, strings.TrimSpace(k3sExtraArgs))
 
-		installK3scommand := fmt.Sprintf("curl -sLS https://get.k3s.io | %s INSTALL_K3S_VERSION='%s' sh -\n", installk3sExec, k3sVersion)
+		installK3scommand := fmt.Sprintf("curl -sLS %s | %s INSTALL_K3S_VERSION='%s' sh -\n", k3sUrl, installk3sExec, k3sVersion)
 		getConfigcommand := fmt.Sprintf(sudoPrefix + "cat /etc/rancher/k3s/k3s.yaml\n")
 		merge, _ := command.Flags().GetBool("merge")
 		context, _ := command.Flags().GetString("context")
